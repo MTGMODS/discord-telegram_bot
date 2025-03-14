@@ -28,8 +28,8 @@ tokens_path = os.path.join(script_dir, "tokens.ini")
 with open(tokens_path) as f:
     for line in f:
         if "=" in line:
-            key, value = line.strip().split("=", 1)  # Видаляємо пробіли та розділяємо по "="
-            tokens[key.strip()] = value.strip()  # Видаляємо зайві пробіли з обох сторін
+            key, value = line.strip().split("=", 1)
+            tokens[key.strip()] = value.strip()
 
 DISCORD_BOT_TOKEN = tokens.get("DISCORD_BOT_TOKEN")
 TG_BOT_TOKEN = tokens.get("TG_BOT_TOKEN")
@@ -41,7 +41,6 @@ def is_admin(username):
     return username == ADMIN_USERNAME
 
 async def give_vip_role(user, upd, checker):
-
     guild = bot.get_guild(DISCORD_GUILD_ID)
     member = None 
     member = discord.utils.get(guild.members, id=int(user)) if user.isdigit() else discord.utils.get(guild.members, name=user)
@@ -59,8 +58,6 @@ async def give_vip_role(user, upd, checker):
             ),
             color=0x3498DB
         )
-        # if member.avatar:
-        #     embed.set_thumbnail(url=member.avatar.url)
         if member.display_avatar:
             embed.set_thumbnail(url=member.display_avatar.url)
         message = await bot.get_channel(CHAT_CHANNEL_ID).send(content=f'{member.mention}', embed=embed)
@@ -93,6 +90,27 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     ]
     reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
     await update.message.reply_text(f"👋 Привет {update.effective_user.name}!\n🤖 Я бот-помощник скриптера MTG MODS\nℹ️ Здесь ты можешь узнать про VIP и приобрести её!", reply_markup=reply_markup)
+    
+    user_command = context.args 
+    if user_command and user_command[0] == 'visa':
+        await update.message.reply_text(
+            (
+                f"<b>💳 Перевод на карту VISA по номеру:</b>\n"
+                f"<pre>4441 1144 6426 8265</pre>\n\n"
+                
+                f"<b>💰 Сумма перевода: 5$ (или больше 😍) по вашему курсу</b>\n\n"
+                f"<b>❗️ Валюта перевода: любая кроме RUB / BYN ❗️</b>\n\n"
+                
+                f"<b>🌍 Международный перевод (если вы не из Украины):</b>\n"
+                f"<b>🔹 Получатель: Marher Bohdan</b>\n"
+                f"<b>🔹 Банк получателя: Monobank</b>\n"
+                f"<b>🔹 Страна получателя: Украина 🇺🇦</b>\n\n"
+                
+                f"<b>💳 Также возможен перевод и по SWIFT / SEPA, <a href='https://t.me/mtg_mods'>свяжитесь</a>.</b>"
+            ),
+            parse_mode="HTML",
+            disable_web_page_preview=True
+        )
 
 async def get_tg_vipchat_members_count(bot, chat_id: int):
     # Отримання кількості учасників у Telegram VIP чаті
@@ -115,38 +133,14 @@ async def generate_single_user_invite_link(bot: Bot, chat_id: int):
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     text = update.message.text
     if text == '💎 Преимущества и цена VIP 💎':
-        # await update.message.reply_text((
-        #     # "ℹ️ Преимущества которые вы получите после покупки VIP роли на нашем <a href='https://discord.gg/qBPEYjfNhv'>Discord сервере</a>\n\n"
-        #     "ℹ️ Преимущества которые вы получите после приобретения VIP:\n\n"
-        #     "1️⃣ VIP выдаётся вам НАВСЕГДА — один раз приобрели, и она остаётся с вами.\n"
-        #     "2️⃣ Вы сразу же будете добавлены в VIP чат (<a href='https://discord.gg/qBPEYjfNhv'>Discord</a>/Telegram на ваш выбор).\n"
-        #     "3️⃣ Вы получите доступ ко всем моим платным скриптам (они находятся в VIP чате).\n"
-        #     "4️⃣ Платные скрипты всегда актуальны и регулярно обновляются..\n"
-        #     "5️⃣ Ранний доступ к обновлениям бесплатных скриптов (исключение – срочный фикс).\n"
-        #     "6️⃣ Отключение рекламы в <a href='https://t.me/mtgmods/1359'>лаунчере MonetLoader</a>.\n"
-        #     "7️⃣ Выделение среди других участников благодаря VIP роли (только в <a href='https://discord.gg/qBPEYjfNhv'>Discord</a>).\n"
-        # ), parse_mode="HTML", disable_web_page_preview=True)
         await context.bot.forward_message(
-            chat_id=update.message.chat_id,  # Переслати в той же чат
+            chat_id=update.message.chat_id,
             from_chat_id="@mtgmods",
             message_id=60
         )
     # elif text == '💵 Приобрести VIP 💵':
     #     await update.message.reply_text((
     #         "ℹ️ Цена приобретения VIP и способы + реквизиты для оплаты:\n\n"
-    #         "● 🪙 Криптовалюта: адрес дам <a href='https://t.me/mtg_mods'>в ЛС</a>\n"
-    #         "● Оплата: 4 USDT / $4 в любых монетах\n\n"
-    #         "● 💳 Банковская карта: номер карты дам <a href='https://t.me/mtg_mods'>в ЛС</a>\n"
-    #         "● Оплата: $4 / €4 / 150 UAH / 2000 KZT / 13 BYN / 50000 UZS\n\n"
-    #         "● 💵 FunPay: https://funpay.com/lots/offer?id=36199657\n"
-    #         "● Оплата: ± 400 RUB / $4\n\n"
-    #         "● ⭐ Telegram Stars: Пишите <a href='https://t.me/mtg_mods'>мне в ЛС</a>\n"
-    #         "● Оплата: 300 ⭐\n\n"
-    #         "● 💵 PayPal: bogdan.mtg@gmail.com\n"
-    #         "● Оплата: $4\n\n"
-    #         "● 💸 Пополнение Steam по логину: bogdan_grile15\n"
-    #         "● Оплата: $5 в вашей валюте\n\n"
-    #         "ℹ️ Если есть желание то вы можете отправить даже больше чем нужно чтобы поддержать меня!\n"
     #     ),parse_mode="HTML",disable_web_page_preview=True)
     elif text == 'ℹ️ Статисика покупок VIP ℹ️':
         guild = bot.get_guild(DISCORD_GUILD_ID) 
@@ -167,12 +161,37 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             parse_mode="HTML",
             disable_web_page_preview=True
         )
+    elif text == '💳':
+        await update.message.reply_text(
+            (
+                f"<b>💳 Перевод на карту VISA по номеру:</b>\n"
+                f"<pre>4441 1144 6426 8265</pre>\n\n"
+                
+                f"<b>💰 Сумма перевода: 5$ (или больше 😍) по вашему курсу</b>\n\n"
+                f"<b>❗️ Валюта перевода: любая кроме RUB / BYN ❗️</b>\n\n"
+                
+                f"<b>🌍 Международный перевод (если вы не из Украины):</b>\n"
+                f"<b>🔹 Получатель: Marher Bohdan</b>\n"
+                f"<b>🔹 Банк получателя: Monobank</b>\n"
+                f"<b>🔹 Страна получателя: Украина 🇺🇦</b>\n\n"
+                
+                f"<b>💳 Также возможен перевод и по SWIFT / SEPA, <a href='https://t.me/mtg_mods'>свяжитесь</a>.</b>"
+            ),
+            parse_mode="HTML",
+            disable_web_page_preview=True
+        )
     elif is_admin(update.message.from_user.username) and not re.search(r'@', text) and not re.search(r'[а-яА-ЯёЁ]', text):
         await give_vip_role(text, update, False)
     elif is_admin(update.message.from_user.username) and not re.search(r'[а-яА-ЯёЁ]', text):
         invite_link = await generate_single_user_invite_link(context.bot, TELEGRAM_VIP_CHAT_ID)
         if invite_link:
-            await update.message.reply_text(f"{text}, заходите в наш Telegram VIP чат по cсылке:\n\n{invite_link}\n\nДанная ссылка действует 60 минут и только для вас!")
+            await update.message.reply_text(
+                f'✅ <b>Успешное приобретение VIP доступа</b> ✅\n\n'
+                f'🥳 <b>{text}</b>, теперь вы - <b>VIP участник!</b>\n\n'
+                f'💎 <b>VIP скрипты доступны в <a href="{invite_link}">этом канале</a> (закреп)</b>\n\n'
+                f'❤️ <b>Спасибо за покупку VIP и финансовую поддержку!</b>',
+                parse_mode="HTML"
+            )
         else:
             await update.message.reply_text("Не удалось создать приглашение в TG VIP чат! Свяжитесь с @mtg_mods.")
 
@@ -186,7 +205,7 @@ async def run_telegram_bot():
 bot = commands.Bot(command_prefix="/", intents=intents)
 @bot.event
 async def on_ready():
-    print(f'Бот запущен как {bot.user}')
+    print(f'Discord bot запущен как {bot.user}')
     try:
         await bot.tree.sync() 
         print("Команды успешно синхронизованы.")
@@ -255,7 +274,7 @@ async def tgvip(interaction: discord.Interaction):
         if invite_link:
             embed = discord.Embed(
             description=(
-                f"Заходите в наш Telegram VIP чат по cсылке:\n\n{invite_link}\n\nДанная ссылка действует 60 минут и только для вас!"
+                f"**{member.mention}, наш Telegram VIP чат по cсылке:\n{invite_link}** *(действует 60 минут)*"
                 #f'**:sunglasses: {vip_count} из {total_members} участников данного сервера - <@&{VIP_ROLE_ID}>**'
             ),
             color=0x3498DB
@@ -273,8 +292,7 @@ async def tgvip(interaction: discord.Interaction):
 async def run_discord_bot():
     await bot.start(DISCORD_BOT_TOKEN)
 
-
-# Start my bots
+# Start bots
 if __name__ == '__main__':
     nest_asyncio.apply()
     asyncio.run(asyncio.gather(run_discord_bot(), run_telegram_bot()))
