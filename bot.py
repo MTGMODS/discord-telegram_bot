@@ -34,13 +34,11 @@ with open(tokens_path) as f:
 DISCORD_BOT_TOKEN = tokens.get("DISCORD_BOT_TOKEN")
 TG_BOT_TOKEN = tokens.get("TG_BOT_TOKEN")
 
-ADMIN_USERNAME = 'mtg_mods'
-
 # Telegram bot setup
 def is_admin(username):
-    return username == ADMIN_USERNAME
+    return username == 'mtg_mods'
 
-async def give_vip_role(user, upd, checker):
+async def give_vip_role_in_ds(user, upd, checker):
     guild = bot.get_guild(DISCORD_GUILD_ID)
     member = None 
     member = discord.utils.get(guild.members, id=int(user)) if user.isdigit() else discord.utils.get(guild.members, name=user)
@@ -50,7 +48,7 @@ async def give_vip_role(user, upd, checker):
         await member.add_roles(role)
         print(f"VIP роль успешно выдана пользователю {member.name} через автопокупку в боте." if checker else f"VIP роль успешно выдана пользователю {member.name}.")
         embed = discord.Embed(
-            title='✅ Успешное приобретение VIP роли ✅',
+            title='✅ Успешное приобретение VIP ✅',
             description=(
                 f'🥳 Теперь вы - {role.mention}!\n\n'
                 f'💎 VIP скрипты доступны в канале <#{VIP_CHANNEL_ID}> (закреп)\n\n'
@@ -64,23 +62,6 @@ async def give_vip_role(user, upd, checker):
         await upd.message.reply_text((f"✅ VIP роль успешно выдана пользователю {member.name}!\n\n✅ Так-же {member.name} отправлено <a href='{message.jump_url}'>оповещение с инструкцией</a>."), parse_mode="HTML", disable_web_page_preview=True)
     else:
         await upd.message.reply_text(("❌ Пользователь с таким ID/USERNAME не найден!\n⚡Сначало зайдите на наш <a href='https://discord.gg/qBPEYjfNhv'>Discord сервер</a>."), parse_mode="HTML", disable_web_page_preview=True)
-
-async def tg_vip(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    username = context.args[0] if context.args else None
-    if username:
-        member = None
-        if username.isdigit(): 
-            member = discord.utils.get(bot.get_guild(DISCORD_GUILD_ID).members, id=int(username))
-        else:
-            member = discord.utils.get(bot.get_guild(DISCORD_GUILD_ID).members, name=username)
-
-        if member:
-            await give_vip_role(member.name)
-            await update.message.reply_text(f'✅ VIP роль в Discord успешно выдана юзеру {member.name}!')
-        else:
-            await update.message.reply_text(("❌ Пользователь с таким ID/USERNAME не найден на нашем <a href='https://discord.gg/qBPEYjfNhv'>Discord сервере</a>!"), parse_mode="HTML", disable_web_page_preview=True)
-    else:
-        await update.message.reply_text('📝 Укажите свой Discord ID/USERNAME пользователя.')
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     keyboard = [
@@ -113,7 +94,6 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
 
 async def get_tg_vipchat_members_count(bot, chat_id: int):
-    # Отримання кількості учасників у Telegram VIP чаті
     return await bot.get_chat_member_count(chat_id)
 
 async def generate_single_user_invite_link(bot: Bot, chat_id: int):
@@ -124,10 +104,10 @@ async def generate_single_user_invite_link(bot: Bot, chat_id: int):
             member_limit=1,
             expire_date=expire_time
         )
-        print(f"Індивідуальне запрошення створено: {invite_link.invite_link}")
+        print(f"Ссылка на TG VIP чат создана: {invite_link.invite_link}")
         return invite_link.invite_link
     except Exception as e:
-        print(f"Помилка створення посилання: {e}")
+        print(f"Ошибка создания ссылки на тг вип чат: {e}")
         return None
 
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -138,10 +118,6 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             from_chat_id="@mtgmods",
             message_id=60
         )
-    # elif text == '💵 Приобрести VIP 💵':
-    #     await update.message.reply_text((
-    #         "ℹ️ Цена приобретения VIP и способы + реквизиты для оплаты:\n\n"
-    #     ),parse_mode="HTML",disable_web_page_preview=True)
     elif text == 'ℹ️ Статисика покупок VIP ℹ️':
         guild = bot.get_guild(DISCORD_GUILD_ID) 
         role = guild.get_role(VIP_ROLE_ID)
@@ -153,7 +129,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         total_vip_members = vip_count_discord + tg_vipchat_members_count
         await update.message.reply_text(
             (
-                f"ℹ️ Количество пользователей которые приобрели VIP:\n\n"
+                # f"ℹ️ Количество пользователей которые приобрели VIP:\n\n"
                 f"1️⃣ Наш <a href='https://discord.gg/qBPEYjfNhv'>Discord сервер</a>: {vip_count_discord} из {total_members} участников - VIP.\n"
                 f"2️⃣ Наш Telegram VIP чат: {tg_vipchat_members_count} участников.\n\n"
                 ##f"😎 Всего VIP пользователей: {total_vip_members}.\n\n"
@@ -181,19 +157,19 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             disable_web_page_preview=True
         )
     elif is_admin(update.message.from_user.username) and not re.search(r'@', text) and not re.search(r'[а-яА-ЯёЁ]', text):
-        await give_vip_role(text, update, False)
+        await give_vip_role_in_ds(text, update, False)
     elif is_admin(update.message.from_user.username) and not re.search(r'[а-яА-ЯёЁ]', text):
         invite_link = await generate_single_user_invite_link(context.bot, TELEGRAM_VIP_CHAT_ID)
         if invite_link:
             await update.message.reply_text(
-                f'✅ <b>Успешное приобретение VIP доступа</b> ✅\n\n'
+                f'✅ <b>Успешное приобретение VIP</b> ✅\n\n'
                 f'🥳 <b>{text}</b>, теперь вы - <b>VIP участник!</b>\n\n'
                 f'💎 <b>VIP скрипты доступны в <a href="{invite_link}">этом канале</a> (закреп)</b>\n\n'
                 f'❤️ <b>Спасибо за покупку VIP и финансовую поддержку!</b>',
                 parse_mode="HTML"
             )
         else:
-            await update.message.reply_text("Не удалось создать приглашение в TG VIP чат! Свяжитесь с @mtg_mods.")
+            await update.message.reply_text("❗Не удалось создать приглашение в TG VIP чат!\n\n👉 Свяжитесь с @mtg_mods.")
 
 async def run_telegram_bot():
     app = ApplicationBuilder().token(TG_BOT_TOKEN).build()
@@ -247,10 +223,8 @@ async def vips(interaction: discord.Interaction):
 
 @bot.tree.command(name="tgvip", description="Вступить в VIP чат в Telegram")
 async def tgvip(interaction: discord.Interaction):
-
     member = interaction.user
     role = discord.utils.get(member.roles, id=VIP_ROLE_ID)
-
     if not role:
         embed = discord.Embed(
             description=(f"Данная команда доступна только для <@&{VIP_ROLE_ID}>!"),
@@ -258,7 +232,6 @@ async def tgvip(interaction: discord.Interaction):
         )
         await interaction.response.send_message(embed=embed)
         return
-
     elif interaction.channel.id != VIP_CHANNEL_ID:
         embed = discord.Embed(
             description=(f"Данную команду можно использовать только в <#{VIP_CHANNEL_ID}>"),
@@ -266,7 +239,6 @@ async def tgvip(interaction: discord.Interaction):
         )
         await interaction.response.send_message(embed=embed)
         return
-
     elif role and interaction.channel.id == VIP_CHANNEL_ID:
         app = ApplicationBuilder().token(TG_BOT_TOKEN).build()
         print('Запрос TG ссылки от пользователя ' + member.mention)
@@ -275,15 +247,13 @@ async def tgvip(interaction: discord.Interaction):
             embed = discord.Embed(
             description=(
                 f"**{member.mention}, наш Telegram VIP чат по cсылке:\n{invite_link}** *(действует 60 минут)*"
-                #f'**:sunglasses: {vip_count} из {total_members} участников данного сервера - <@&{VIP_ROLE_ID}>**'
             ),
             color=0x3498DB
         )
         else:
             embed = discord.Embed(
             description=(
-                f"Ошибка не удалось сгенерировать приглашение в Telegram VIP чат!"
-
+                f"Ошибка, не удалось сгенерировать приглашение в Telegram VIP чат!"
             ),
             color=0x3498DB
         )
