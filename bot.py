@@ -68,7 +68,7 @@ async def send_payment_info(update: Update, payment_method: str):
     payment_texts = {
         "visa": (
             f"<b>💳 Перевод на карту VISA по номеру:</b>\n"
-            f"<pre>4441 1144 6426 8265</pre>\n\n"
+            f"<pre>4441 1110 5391 5983</pre>\n\n"
 
             f"🌍 <b>Международный перевод:</b>\n"
             f"🔹 <b>Получатель: Marher Bohdan</b>\n"
